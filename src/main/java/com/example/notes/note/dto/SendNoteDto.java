@@ -3,15 +3,15 @@ package com.example.notes.note.dto;
 import com.example.notes.note.model.Note;
 import com.example.notes.user.model.User;
 import jakarta.validation.Valid;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @Valid
 public class SendNoteDto {
+    private Long id;
     private Note note;
     private User senderUser;
     private User acceptedUser;

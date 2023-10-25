@@ -16,4 +16,5 @@ public interface NoteService {
     List<Note> getAll();
     SendNote sendNote(Long userIdFrom, Long userIdTo, Long noteId);
     List<SendNoteFrom> getSendNotesForUser(Long userId);
+    Note acceptedSendNoteForUser(Long userId, Long noteId);
 }

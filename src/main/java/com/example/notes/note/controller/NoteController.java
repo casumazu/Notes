@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,13 +30,13 @@ public class NoteController {
     }
 
     @GetMapping("/{userId}")
-    List<Note> getNoteByUserId(@PathVariable Long userId) {
+    public List<Note> getNoteByUserId(@PathVariable Long userId) {
         log.info("Получен GET-запрос на получение всех заметок пользователя {}", userId);
         return noteService.getNoteByUserId(userId);
     }
 
     @GetMapping("/all")
-    List<Note> getAll() {
+    public List<Note> getAll() {
         return noteService.getAll();
     }
 
@@ -46,7 +47,16 @@ public class NoteController {
     }
 
     @GetMapping("/sendNote/{userId}")
-    List<SendNoteFrom> getSendNotesForUser(@PathVariable Long userId) {
+    @Transactional(readOnly = true)
+    public List<SendNoteFrom> getSendNotesForUser(@PathVariable Long userId) {
         return noteService.getSendNotesForUser(userId);
+    }
+
+    @PostMapping("/sendNote/{userId}/{noteId}")
+    @Transactional
+    @ResponseStatus(HttpStatus.CREATED)
+    public Note acceptedSendNoteForUser(@PathVariable Long userId, @PathVariable Long noteId){
+        log.info("Получен запрос на добавление заметки {} пользователю ID {} из запросов", noteId, userId);
+        return noteService.acceptedSendNoteForUser(userId, noteId);
     }
 }

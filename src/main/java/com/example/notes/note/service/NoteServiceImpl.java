@@ -15,8 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -77,13 +77,40 @@ public class NoteServiceImpl implements NoteService {
         User userFrom = findUser(userIdFrom);
         User userTo = findUser(userIdTo);
         Note note = findNote(noteId);
-        SendNoteDto sendNoteDto = new SendNoteDto(note, userFrom, userTo, false);
+        SendNoteDto sendNoteDto = new SendNoteDto(null, note, userFrom, userTo, false);
         return sendNoteRepository.save(mapper.toSendNote(sendNoteDto));
     }
 
+
+    // Просмотр запросов на передачу заметок для пользователя
     public List<SendNoteFrom> getSendNotesForUser(Long userId) {
         findUser(userId);
-        return sendNoteRepository.findByUserId(userId);
+        return sendNoteRepository.findByAcceptedUserId(userId)
+                .stream()
+                .map(mapper::toSendNoteFrom)
+                .collect(Collectors.toList());
+    }
+
+    public Note acceptedSendNoteForUser(Long userId, Long noteId) {
+        User user = findUser(userId);
+        Note saveNote = findNote(noteId);
+
+        boolean exists = sendNoteRepository.existsByNoteIdAndAcceptedUserId(noteId, userId);
+
+        if (exists) {
+            Note note = new Note();
+            note.setName(saveNote.getName());
+            note.setDescription(saveNote.getDescription());
+            note.setCreated(LocalDateTime.now());
+            note.setUser(user);
+            noteRepository.save(note);
+
+            sendNoteRepository.removeByNoteIdAndAcceptedUserId(noteId, userId);
+
+            return saveNote;
+        } else {
+            throw new NotFoundException("Заметки не существует в списке запросов.");
+        }
     }
 
     private User findUser(Long userId) {
