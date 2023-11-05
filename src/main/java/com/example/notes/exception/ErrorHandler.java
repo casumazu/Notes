@@ -15,7 +15,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     @ResponseBody
-    public ApiError handleNotFound(final NotFoundException e){
+    public ApiError handleNotFound(final NotFoundException e) {
         log.error("404 {}", e.getMessage(), e);
         return new ApiError(
                 e.getMessage(), "Not Found",
@@ -25,8 +25,13 @@ public class ErrorHandler {
     @ResponseBody
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleExistsException(final ExistsException e){
+    public ApiError handleExistsException(final ExistsException e) {
         return new ApiError(e.getMessage(), "Already Exists Exception",
                 HttpStatus.CONTINUE.getReasonPhrase().toUpperCase(), LocalDateTime.now());
+    }
+
+    public ApiError handleUnauthorizedException(final UnauthorizedException e) {
+        return new ApiError(e.getMessage(), "No access",
+                HttpStatus.FORBIDDEN.getReasonPhrase().toUpperCase(), LocalDateTime.now());
     }
 }

@@ -6,7 +6,6 @@ import com.example.notes.note.model.Note;
 import com.example.notes.note.model.SendNote;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface NoteService {
     Note createNote (NoteDto noteDto, Long userId);
@@ -17,4 +16,5 @@ public interface NoteService {
     SendNote sendNote(Long userIdFrom, Long userIdTo, Long noteId);
     List<SendNoteFrom> getSendNotesForUser(Long userId);
     Note acceptedSendNoteForUser(Long userId, Long noteId);
+    Note addUserForNote(Long userId, Long noteId);
 }

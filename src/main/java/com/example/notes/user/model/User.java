@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
+
 @Entity
 @Table(name = "users")
 @NoArgsConstructor

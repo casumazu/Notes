@@ -1,6 +1,7 @@
 package com.example.notes.note.service;
 
 import com.example.notes.exception.NotFoundException;
+import com.example.notes.exception.UnauthorizedException;
 import com.example.notes.note.dto.NoteDto;
 import com.example.notes.note.dto.SendNoteDto;
 import com.example.notes.note.dto.SendNoteFrom;
@@ -34,22 +35,34 @@ public class NoteServiceImpl implements NoteService {
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
         note.setCreated(LocalDateTime.now());
-        note.setUser(user);
+        note.setCreatedUser(user);
         note.setName(note.getName());
+        note.setCommon(false);
         return noteRepository.save(note);
     }
 
     @Override
     public Note updateNote(NoteDto noteDto, Long userId, Long noteId) {
-        userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
+        User user = findUser(userId);
 
-        Note note = noteRepository.findById(noteId)
-                .orElseThrow(() -> new NotFoundException("Заметка не найдена"));
-        note.setChanged(LocalDateTime.now());
+        Note note = findNote(noteId);
+
+        if (!userHasNotePermission(user, note) && !note.getCreatedUser().equals(user)) {
+            throw new UnauthorizedException("У вас нет разрешения на изменение этой заметки");
+        }
+        if (note.getCommon()) {
+            note.setChangedUser(user);
+        }
         Optional.ofNullable(noteDto.getName()).ifPresent(note::setName);
         Optional.ofNullable(noteDto.getDescription()).ifPresent(note::setDescription);
+
+        note.setChanged(LocalDateTime.now());
         return noteRepository.save(note);
+    }
+
+    private boolean userHasNotePermission(User user, Note note) {
+        return note.getUserSet().stream()
+                .anyMatch(noteUser -> noteUser.equals(user));
     }
 
     @Override
@@ -57,7 +70,7 @@ public class NoteServiceImpl implements NoteService {
         userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь не найден"));
 
-        return noteRepository.findByUserId(userId);
+        return noteRepository.findByCreatedUserIdOrUserSet_Id(userId, userId);
     }
 
     @Override
@@ -102,7 +115,7 @@ public class NoteServiceImpl implements NoteService {
             note.setName(saveNote.getName());
             note.setDescription(saveNote.getDescription());
             note.setCreated(LocalDateTime.now());
-            note.setUser(user);
+            note.setCreatedUser(user);
             noteRepository.save(note);
 
             sendNoteRepository.removeByNoteIdAndAcceptedUserId(noteId, userId);
@@ -111,6 +124,15 @@ public class NoteServiceImpl implements NoteService {
         } else {
             throw new NotFoundException("Заметки не существует в списке запросов.");
         }
+    }
+
+    // Добавление пользователя для заметки
+    public Note addUserForNote(Long userId, Long noteId) {
+        User user = findUser(userId);
+        Note note = findNote(noteId);
+        note.setCommon(true);
+        note.getUserSet().add(user);
+        return noteRepository.save(note);
     }
 
     private User findUser(Long userId) {

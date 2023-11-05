@@ -4,6 +4,8 @@ import com.example.notes.user.model.User;
 import jakarta.validation.Valid;
 import lombok.*;
 
+import java.util.Set;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
@@ -14,4 +16,5 @@ public class NoteDto {
     private String name;
     private String description;
     private User user;
+    private Set<User> userSet;
 }

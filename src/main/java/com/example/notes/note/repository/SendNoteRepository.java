@@ -1,7 +1,5 @@
 package com.example.notes.note.repository;
 
-import com.example.notes.note.dto.SendNoteDto;
-import com.example.notes.note.dto.SendNoteFrom;
 import com.example.notes.note.model.SendNote;
 import org.springframework.data.jpa.repository.JpaRepository;
 
