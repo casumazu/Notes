@@ -15,6 +15,6 @@ public class NoteDto {
     private Long id;
     private String name;
     private String description;
-    private User user;
+    private User createdUser;
     private Set<User> userSet;
 }
