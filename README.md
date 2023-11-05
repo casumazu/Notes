@@ -39,6 +39,6 @@
         
 Добавление общего пользователя в заметку (для общего редактирования)
 
-        http://localhost:8080/note/add/2/1
+        http://localhost:8080/note/add/::userId/::noteId
 
 
